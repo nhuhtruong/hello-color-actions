@@ -1,13 +1,19 @@
 name: Upload Website
-on:
+# workflow will run on every push event
+on: 
   push:
+
+# workflow has two jobs: build (CI part) and deploy (CD part)
 jobs:
   build:
+    # env where it is executed
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # version of nodeJS to use (12.X)
         node-version: [12.x]
     steps:
+      # execution steps - downloading Git code, setting up NodeJS, build our project, and test if it runs well
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -18,10 +24,14 @@ jobs:
       - run: npm test
         env:
           CI: true
+  
+  # sset a dependency in the build stage
+  # if build stage fails, deploy stagge will not be executed
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      # use the Github Action to deploy the code on AWS S3
       - uses: actions/checkout@master
       - uses: jakejarvis/s3-sync-action@master
         with:
